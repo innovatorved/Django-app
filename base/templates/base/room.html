@@ -1,0 +1,16 @@
+{% include 'navbar.html' %}
+
+{% block Content %}
+<h2>List of Room</h2>
+
+<div>
+    <hr>
+    {% for room in rooms %}
+        <div>
+            <label>Id : </label><b>{{room.id}} </b> &  
+            <label>Name : </label><b>{{room.name}}</b>
+        </div>
+    {% endfor %}
+    <hr>
+</div>
+{% endblock Content %}
