@@ -2,4 +2,21 @@
 
 {% block Content %}
 <h1>This is HomePage</h1>
+
+<h4><a href="{% url 'create-room' %}" >Create Room</a></h4>
+<h2>List of Room</h2>
+
+<div>
+    <hr>
+    {% for room in rooms %}
+        <div>
+            <label>Id : </label><b>{{room.id}} </b> |
+            <label>Name : </label><a href="{% url 'room' room.id %}"><b>{{room.name}}</b></a>   |
+            <label>@{{room.host.username}}</label>  |
+            <small>{{room.topic.name}}</small>
+        </div>
+    {% endfor %}
+    <hr>
+</div>
+
 {% endblock Content %}

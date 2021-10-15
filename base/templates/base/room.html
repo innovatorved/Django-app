@@ -1,16 +1,13 @@
 {% include 'navbar.html' %}
 
 {% block Content %}
-<h2>List of Room</h2>
+<h2>Room </h2>
 
 <div>
-    <hr>
-    {% for room in rooms %}
-        <div>
-            <label>Id : </label><b>{{room.id}} </b> &  
-            <label>Name : </label><b>{{room.name}}</b>
-        </div>
-    {% endfor %}
-    <hr>
+    <a href="{% url 'update-room' room.id %}"><small>Edit</small></a><hr>
+    <label>Name : </label><b>{{room.name}}</b> <hr>
+    <label>Description : </label><b>{{room.description}}</b> <hr>
+    <label>Created On : </label><b>{{room.created}}</b> <hr>
 </div>
+
 {% endblock Content %}
