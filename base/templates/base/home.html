@@ -1,22 +1,43 @@
-{% extends "main.html"%}
+{% extends "main.html"%} 
 
 {% block Content %}
+
+<style>
+    .home-container{
+        display: grid;
+        grid-template-columns: 1fr 3fr ;
+    }
+</style>
+
+
 <h1>This is HomePage</h1>
 
-<h4><a href="{% url 'create-room' %}" >Create Room</a></h4>
-<h2>List of Room</h2>
-
-<div>
-    <hr>
-    {% for room in rooms %}
-        <div>
-            <label>Id : </label><b>{{room.id}} </b> |
-            <label>Name : </label><a href="{% url 'room' room.id %}"><b>{{room.name}}</b></a>   |
-            <label>@{{room.host.username}}</label>  |
-            <small>{{room.topic.name}}</small>
-        </div>
+<div class="home-container">
+  <div>
+    <h2>Browse topic</h2>
+    <br/>
+    {% for topic in topics %}
+        <h3><a href="{% url 'home' %}?topic={{topic.name}}">{{topic.name}}</a></h3>
     {% endfor %}
-    <hr>
+  </div>
+
+  <div>
+    <h4><a href="{% url 'create-room' %}">Create Room</a></h4>
+    <h3>List of Room : {{room_count}}</h3>
+    <div>
+      <hr />
+      {% for room in rooms %}
+      <div>
+        <label>Id : </label><b>{{room.id}} </b> | 
+        <label>Name : </label><a href="{% url 'room' room.id %}"><b>{{room.name}}</b></a> |
+        <label>@{{room.host.username}}</label> |
+        <small>{{room.topic.name}}</small> |
+        <small><a href="{% url 'delete-room' room.id %}">Delete Room</a></small>
+      </div>
+      <hr />
+      {% endfor %}
+    </div>
+  </div>
 </div>
 
 {% endblock Content %}
