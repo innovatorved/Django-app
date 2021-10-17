@@ -1,6 +1,8 @@
 from django.db.models.base import ModelState
 from django.shortcuts import render , redirect
+
 from django.db import models
+from django.contrib.auth.models import User
 # from django.http import HttpResponse
 
 # search in db
@@ -8,13 +10,21 @@ from django.db.models import Q
 
 from .models import Room , Topic
 
+#  flash messages
+from django.contrib import messages
+
 #  Import Form
 from .forms import RoomForm , LoginForm
+
+# Authenticate Users
+from django.contrib.auth import authenticate , login , logout
 
 # Create your views here.
 def home(req):
     topic = Topic.objects.all()
     rooms = Room.objects.all()
+
+    # print(req.user.is_authenticated)
 
     if req.GET.get('topic'):
         # print("topic avail")
@@ -28,7 +38,7 @@ def home(req):
         rooms = Room.objects.filter(
             Q(topic__name__icontains=searchQuery) |
             Q(name__icontains=searchQuery) |
-            Q(description_icontains=searchQuery)
+            Q(description__icontains=searchQuery)
         )
         if not rooms : rooms = Room.objects.all()
     room_count = rooms.count()
@@ -77,6 +87,30 @@ def deleteRoom(req , id):
     return render(req , "base/delete.html" ,context)
 
 def LoginRegister(req):
+    if req.method == "POST":
+        username = req.POST.get("username")
+        password = req.POST.get("pwd")
+        try :
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            messages.error(req, 'User Doesnot Exists')
+
+        # if user exists authenticate the user
+        user = authenticate(req , username=username , password=password)
+        if user is not None:
+            login(req , user)
+            messages.success(req, 'Login Successfully')
+            return redirect('home')
+        else :
+            messages.error(req, 'Username or Password Doesn\'t Exists')
+
     form = LoginForm()
     context = {"form" : form}
     return render(req , "base/login_register.html" , context)
+
+def LogoutUser(req):
+    try :
+        logout(req)
+    except :
+        pass
+    return redirect('home')
