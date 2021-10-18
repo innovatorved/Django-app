@@ -4,7 +4,10 @@
 <h2>Room </h2>
 
 <div>
-    <a href="{% url 'update-room' room.id %}"><small>Edit</small></a><hr>
+    {% if request.user == room.host %}
+        <small><a href="{% url 'delete-room' room.id %}">Delete Room</a></small> &nbsp;
+        <a href="{% url 'update-room' room.id %}"><small>Edit</small></a><hr>
+    {% endif %}
     <label>Name : </label><b>{{room.name}}</b> <hr>
     <label>Description : </label><b>{{room.description}}</b> <hr>
     <label>Created On : </label><b>{{room.created}}</b> <hr>

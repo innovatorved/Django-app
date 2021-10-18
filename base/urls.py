@@ -8,6 +8,7 @@ urlpatterns =[
     path('create-room/' , views.createRoom , name="create-room"),
     path('update-room/<str:id>' , views.updateRoom , name="update-room"),
     path('delete-room/<str:id>' , views.deleteRoom  , name="delete-room"),
-    path('login/' , views.LoginRegister , name="login"),
-    path('logout/' , views.LogoutUser , name="logout")
+    path('login/' , views.LoginPage , name="login"),
+    path('logout/' , views.LogoutUser , name="logout"),
+    path('signup/' , views.RegisterPage , name="signup")
 ]

@@ -5,6 +5,8 @@ from django.db import models
 from django.contrib.auth.models import User
 # from django.http import HttpResponse
 
+from django.http import HttpResponse
+
 # search in db
 from django.db.models import Q
 
@@ -14,10 +16,13 @@ from .models import Room , Topic
 from django.contrib import messages
 
 #  Import Form
-from .forms import RoomForm , LoginForm
+from .forms import RoomForm , LoginForm , CreateUser
 
 # Authenticate Users
 from django.contrib.auth import authenticate , login , logout
+
+# restrict  user to create room if they not logged in by Decorators
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 def home(req):
@@ -55,6 +60,7 @@ def room(req , id):
     # print(context["room"].description)
     return render(req , "base/room.html" , context)
  
+@login_required(login_url='login') # if not logged in redirect to home paddge
 def createRoom(req):
     form = RoomForm()
     if req.method == "POST":
@@ -66,9 +72,14 @@ def createRoom(req):
     context = {'form' : form}
     return render (req , "base/room_form.html" , context)
 
+@login_required(login_url='login') # if not logged in redirect to home paddge
 def updateRoom(req , id):
     room = Room.objects.get(id=id)
     form = RoomForm(instance=room)
+
+    if req.user != room.host:
+        return HttpResponse("User Restricted here")
+
     if req.method == "POST":
         field = RoomForm(req.POST , instance=room)
         if field.is_valid():
@@ -78,17 +89,25 @@ def updateRoom(req , id):
     context = {"form" : form}
     return render (req , "base/room_form.html" , context)
 
+@login_required(login_url='login') # if not logged in redirect to home paddge
 def deleteRoom(req , id):
     room = Room.objects.get(id=id)
+
+    if req.user != room.host:
+        return HttpResponse("User Restricted here")
+
     if req.method == "POST":
         room.delete()
         return redirect("home")
     context = {"id" : room.id , "name" : room.name}
     return render(req , "base/delete.html" ,context)
 
-def LoginRegister(req):
+def LoginPage(req):
+    if req.user.is_authenticated :
+        messages.info(req, 'User Already Logged In Please logged out to Logged In with Different Account')
+        return redirect("home")
     if req.method == "POST":
-        username = req.POST.get("username")
+        username = req.POST.get("username").lower()
         password = req.POST.get("pwd")
         try :
             user = User.objects.get(username=username)
@@ -105,12 +124,37 @@ def LoginRegister(req):
             messages.error(req, 'Username or Password Doesn\'t Exists')
 
     form = LoginForm()
-    context = {"form" : form}
+    context = {
+        "form" : form,
+        "page" : "login"
+    }
     return render(req , "base/login_register.html" , context)
 
 def LogoutUser(req):
+    if not req.user.is_authenticated :
+        messages.info(req, 'User Already Loged Out')
+        return redirect("home")
     try :
         logout(req)
     except :
         pass
+    messages.success(req, 'Logout Successfully')
     return redirect('home')
+
+def RegisterPage(req):
+    if req.method == 'POST':
+        form = CreateUser.form(req.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.username = user.username.lower()
+            user.save()
+            messages.success(req, 'Successfully user created')
+            login(req , user)
+            messages.success(req, 'User Logged In')
+            return redirect('home')
+
+    context = {
+        "form" : CreateUser.form(),
+        "page" : "SignUp"
+    }
+    return render(req , "base/login_register.html", context)
