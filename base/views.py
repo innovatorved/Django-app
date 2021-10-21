@@ -10,7 +10,7 @@ from django.http import HttpResponse
 # search in db
 from django.db.models import Q
 
-from .models import Room , Topic
+from .models import Room , Topic , Message
 
 #  flash messages
 from django.contrib import messages
@@ -56,9 +56,21 @@ def room(req , id):
     except Room.DoesNotExist:
         room = Room.objects.get(id=1)
 
-    context = {"room" : room}
+    if req.method == "POST":
+        msg = req.POST.get("body")
+        message = Message.objects.create(
+            user = req.user,
+            room = room,
+            body = msg
+        )
+        message.save()
+        return redirect('room' , id=room.id)
+    # extract set of message related to this room
+    room_msg = room.message_set.all().order_by('-created')
+    context = {"room" : room , "room_msg" : room_msg} 
     # print(context["room"].description)
     return render(req , "base/room.html" , context)
+
  
 @login_required(login_url='login') # if not logged in redirect to home paddge
 def createRoom(req):
@@ -152,6 +164,9 @@ def RegisterPage(req):
             login(req , user)
             messages.success(req, 'User Logged In')
             return redirect('home')
+        else:
+            print(form.error_messages)
+            messages.error(req, 'Error in Signup')
 
     context = {
         "form" : CreateUser.form(),

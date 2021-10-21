@@ -11,6 +11,29 @@
     <label>Name : </label><b>{{room.name}}</b> <hr>
     <label>Description : </label><b>{{room.description}}</b> <hr>
     <label>Created On : </label><b>{{room.created}}</b> <hr>
+
+    <div class="room-msg">
+    <h3>Message</h3>
+        {% for msg in room_msg %}
+            <div>
+                <small> 
+                <b>@{{msg.user}}</b>
+                : {{msg.created|timesince}}
+                </small> 
+                <p>{{msg.body}}</p>
+                <hr/>
+            </div>
+        {% endfor %}
+    </div>
 </div>
 
+<div>
+    {% if request.user.is_authenticated %}
+    <form method="post" action="">
+        {% csrf_token %}
+        <input type="text" name="body" placeholder="Enter your text msg..."/>
+        <input type="submit" value="Submit" />
+    </form>
+    {% endif %}
+</div>
 {% endblock Content %}
